@@ -3,24 +3,30 @@
 #
 # NOTE: The Tic's control mode must be "Serial / I2C / USB".
 
-# import subprocess
-import yaml
-
+import subprocess
+import sys
+import configparser
+# import yaml
 
 def ticcmd(*args):
-    return " DHJDHJDHDHLD"
-    # return subprocess.check_output(['ticcmd'] + list(args))
+    return subprocess.check_output(['ticcmd'] + list(args))
 
 
-# status = yaml.load(ticcmd('-s', '--full'))
-status = " unknown"
+if __name__ == '__main__':
+    assert len(sys.argv) == 2
 
-# position = status['Current position']
-position = 123
-print("Current position is {}.".format(position))
+    config = configparser.ConfigParser()
+    config.read('config.cfg')
+    gearRatio = float(config['DEFAULT']['gear_ratio'])
+    motorDegrees = float(config['DEFAULT']['motor_degrees'])
 
-new_target = -200 if position > 0 else 200
-print("Setting target position to {}.".format(new_target))
-ticcmd('--exit-safe-start', '--position', str(new_target))
+    print("gearRatio : " + str(gearRatio))
+    print("multiplied : " + str(gearRatio * motorDegrees))
 
-
+    argument = str(sys.argv[1])
+    if argument == '-r':
+        print(ticcmd().decode('UTF-8'))
+        print('-r')
+    else:
+        print(ticcmd().decode('UTF-8'))
+        print('angle')
