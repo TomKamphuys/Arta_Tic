@@ -125,19 +125,11 @@ if __name__ == '__main__':
     # The second argument is either '-r' or an angle
     assert len(sys.argv) == 2, "The number of arguments is wrong. Program needs to be called like this: [main.exe -r] or [python main.py 10]. "
 
+    print_and_log('Custom script')
+
     # GO!
     # Having functions helps in having a clear scope of variables.
     # variables here are kinda global (according to the internet)
-    # start()
-
-    config = configparser.ConfigParser()
-    config.read('config.cfg')
-    settings = 'SETTINGS'
-    custom_script_name = config[settings]['custom_script_name']
-
-    if config.getboolean(settings, 'custom_script'):
-        print_and_log(subprocess.check_output(['python', custom_script_name, sys.argv[1]]).decode('UTF-8'))
-    else:
-        start()
+    start()
 
     sys.exit(0)
