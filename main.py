@@ -26,12 +26,12 @@ def ticcmd(*args):
     return subprocess.check_output(['ticcmd'] + list(args))
 
 
-# Run the ticcmd comamands as given in the config file under
+# Run the ticcmd commands as given in the config file under
 # RESET or ANGLE respectively
 def run(commands, mode, steps, delay):
     # loop over all commands
     for unused, command in commands:
-        # split the string from the input file into several string. delimiter is ','
+        # split the string from the input file into several strings. delimiter is ','
         input_list = command.split(",")
 
         # replace NUM with a string representation of the nr of steps
@@ -48,24 +48,29 @@ def run(commands, mode, steps, delay):
         time.sleep(delay)
 
 
-def setup_logging():
-    handler = logging.handlers.WatchedFileHandler(
-        os.environ.get("LOGFILE", "./Arta_tic.log"))
-    formatter = logging.Formatter(logging.BASIC_FORMAT)
-    handler.setFormatter(formatter)
+def setup_logging(logging_enabled, logging_location):
     root = logging.getLogger()
-    root.setLevel(os.environ.get("LOGLEVEL", "DEBUG"))
-    root.addHandler(handler)
+
+    if logging_enabled:
+        handler = logging.handlers.WatchedFileHandler(
+            os.environ.get("LOGFILE", logging_location))
+        formatter = logging.Formatter(logging.BASIC_FORMAT)
+        handler.setFormatter(formatter)
+        root.setLevel(os.environ.get("LOGLEVEL", "DEBUG"))
+        root.addHandler(handler)
 
 
 def read_config():
     config = configparser.ConfigParser()
     config.read('config.cfg')
-    gear_ratio = float(config['CONVERSION']['gear_ratio'])
-    mode = Mode[config['CONVERSION']['mode']]  # convert string to enum
-    delay = float(config['CONVERSION']['delay'])
+    settings = 'SETTINGS'
+    gear_ratio = float(config[settings]['gear_ratio'])
+    mode = Mode[config[settings]['mode']]  # convert string to enum
+    delay = float(config[settings]['delay'])
+    logging_enabled = config.getboolean(settings, 'logging_enabled')
+    logging_location = str(config.get(settings, 'logging_location', fallback='./Arta_tic.log'))
 
-    return gear_ratio, mode, delay
+    return gear_ratio, mode, delay, logging_enabled, logging_location
 
 
 def read_commands(section):
@@ -84,9 +89,9 @@ def print_and_log(line):
 
 
 def main():
-    setup_logging()
+    (gear_ratio, mode, delay, logging_enabled, logging_location) = read_config()
 
-    (gear_ratio, mode, delay) = read_config()
+    setup_logging(logging_enabled, logging_location)
 
     print_and_log("gear_ratio : " + str(gear_ratio))
 
